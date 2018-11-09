@@ -73,6 +73,11 @@
             <artifactId>spring-boot-starter-jdbc</artifactId>
             <version>2.1.0.RELEASE</version>
         </dependency>
+        <dependency>
+            <groupId>org.mybatis</groupId>
+            <artifactId>mybatis-typehandlers-jsr310</artifactId>
+            <version>1.0.0</version>
+        </dependency>
 
     </dependencies>
 

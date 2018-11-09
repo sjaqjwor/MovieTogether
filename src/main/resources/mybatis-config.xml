@@ -5,8 +5,10 @@
 <configuration>
     <typeAliases>
         <package name="com.movie.movie.mappers.MovieMapper"/>
+        <package name="com.movie.movie.mappers.DailyMapper"/>
     </typeAliases>
     <mappers>
         <mapper resource="mybatis/MovieMapper.xml"/>
+        <mapper resource="mybatis/DailyMovieMapper.xml"/>
     </mappers>
 </configuration>
