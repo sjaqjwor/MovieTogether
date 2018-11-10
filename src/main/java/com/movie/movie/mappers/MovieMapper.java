@@ -9,5 +9,5 @@ import java.util.List;
 @Mapper
 @Repository
 public interface MovieMapper {
-    List<Movie> ex();
+    void insertMovie(Movie movie);
 }

@@ -1,13 +1,14 @@
 package com.movie.movie.configs;
 
 import com.movie.movie.domains.DailyMovie;
+import com.movie.movie.domains.Movie;
 import com.movie.movie.mappers.DailyMapper;
-import com.movie.movie.utils.restobject.ResponseKoflicData;
+import com.movie.movie.mappers.MovieMapper;
+import com.movie.movie.utils.koflic.ResponseDailyMoviceChartData;
+import com.movie.movie.utils.koflic.ResponseMoviceInfoData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -21,7 +22,8 @@ import java.util.Map;
 @Component
 public class MovieSchedule {
 
-
+    @Autowired
+    private MovieMapper movieMapper;
 
     @Autowired
     private DailyMapper dailyMapper;
@@ -29,8 +31,11 @@ public class MovieSchedule {
     @Value("${kofic.api.key}")
     private String koficKey;
 
-    @Value("${kofic.url}")
-    private String koficUrl;
+    @Value("${kofic.daily.url}")
+    private String koficDailyUrl;
+
+    @Value("${kofic.movieinfo.url}")
+    private String koficMovieinfoUrl;
 
     @Value("${naver.client.id}")
     private String naverClientid;
@@ -38,9 +43,12 @@ public class MovieSchedule {
     @Value("${naver.client.secret}")
     private String naverClientSecret;
 
+    @Value("${naver.url}")
+    private String naverUrl;
 
 
-    @Scheduled(cron = " 0 0 1 * * *")
+
+    @Scheduled(cron = " 0 7 15 * * *")
     public void inserMovieInformation(){
 
         RestTemplate restTemplate = new RestTemplate();
@@ -50,17 +58,29 @@ public class MovieSchedule {
         LocalDateTime now = LocalDateTime.now().minusDays(1);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
 
-        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(koficUrl).queryParam("key",koficKey)
+        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(koficDailyUrl).queryParam("key",koficKey)
                 .queryParam("targetDt",now.format(formatter));
 
-        ResponseEntity<ResponseKoflicData> responseKoflicDataResponseEntity =
-                restTemplate.getForEntity(builder.build().toUri(),ResponseKoflicData.class);
+
+
+        ResponseEntity<ResponseDailyMoviceChartData> responseKoflicDataResponseEntity =
+                restTemplate.getForEntity(builder.build().toUri(), ResponseDailyMoviceChartData.class);
+
+
 
         if(responseKoflicDataResponseEntity.getStatusCode().is2xxSuccessful()){
             List<Map<String,String>> getDailyBoxOfficeList = responseKoflicDataResponseEntity.getBody().getBoxOfficeResult().getDailyBoxOfficeList();
+
+            headers.add("X-Naver-Client-Id",naverClientid);
+            headers.add("X-Naver-Client-Secret",naverClientSecret);
+
             for(Map<String,String> dailyMap : getDailyBoxOfficeList){
                 DailyMovie dailyMovie = new DailyMovie().buildDailyMovieFromKoflicObject(dailyMap);
-                dailyMapper.insetDailyMovie(dailyMovie);
+                dailyMapper.insertDailyMovie(dailyMovie);
+                builder = UriComponentsBuilder.fromHttpUrl(koficMovieinfoUrl).queryParam("key",koficKey).queryParam("movieCd",dailyMap.get("movieCd"));
+                ResponseEntity<ResponseMoviceInfoData> movieinfo =  restTemplate.getForEntity(builder.build().toUri(), ResponseMoviceInfoData.class);
+                Movie movie = new Movie().buildMovieFromMovieInfo(movieinfo.getBody().getMovieInfoResult().getMovieInfo(),dailyMap.get("movieNm"),Integer.parseInt(dailyMap.get("movieCd")));
+                movieMapper.insertMovie(movie);
             }
         }
 

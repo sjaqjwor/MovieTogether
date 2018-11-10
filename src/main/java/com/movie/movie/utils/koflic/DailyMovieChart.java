@@ -1,6 +1,5 @@
-package com.movie.movie.utils.restobject;
+package com.movie.movie.utils.koflic;
 
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -9,7 +8,7 @@ import java.util.Map;
 
 @Getter
 @Setter
-public class KoficObject {
+public class DailyMovieChart {
     private String boxofficeType;
     private String showRange;
     private List<Map<String,String>> dailyBoxOfficeList;

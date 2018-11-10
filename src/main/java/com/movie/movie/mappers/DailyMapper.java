@@ -10,5 +10,5 @@ import java.util.List;
 @Mapper
 @Repository
 public interface DailyMapper {
-    void insetDailyMovie(DailyMovie dailyMovie);
+    void insertDailyMovie(DailyMovie dailyMovie);
 }
