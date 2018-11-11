@@ -10,4 +10,5 @@ import java.util.List;
 @Repository
 public interface MovieMapper {
     void insertMovie(Movie movie);
+    Movie selectByMovieCd(Integer movieCd);
 }

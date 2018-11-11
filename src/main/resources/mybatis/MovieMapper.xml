@@ -1,8 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?> <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.movie.movie.mappers.MovieMapper">
-        <insert id="insertMovie" parameterType="com.movie.movie.domains.Movie">
+    <insert id="insertMovie" parameterType="com.movie.movie.domains.Movie">
         insert into movietogether.movie(movieCn,mname,mrelease,mimageUrl,mdirector,mgenre,mnation,maudits)
         values (#{movieCn},#{mname},#{mrelease},#{mimageUrl},#{mdirector},#{mgenre},#{mnation},#{maudits})
     </insert>
+    <select id="selectByMovieCd" resultType="com.movie.movie.domains.Movie">
+        select *
+        from movietogether.movie
+        where movieCn=#{movieCn}
+    </select>
 </mapper>
