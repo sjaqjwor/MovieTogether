@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -48,6 +49,7 @@ public class MovieSchedule {
 
 
     @Scheduled(cron = " 0 17 15 * * *")
+    @Transactional
     public void insertMovieInformation() {
 
         RestTemplate restTemplate = new RestTemplate();
@@ -74,12 +76,14 @@ public class MovieSchedule {
             for (Map<String, String> dailyMap : getDailyBoxOfficeList) {
                 DailyMovie dailyMovie = new DailyMovie().buildDailyMovieFromKoflicObject(dailyMap);
                 dailyMapper.insertDailyMovie(dailyMovie);
+
                 if (movieMapper.selectByMovieCd(Integer.parseInt(dailyMap.get("movieCd"))) == null) {
                     builder = UriComponentsBuilder.fromHttpUrl(koficMovieinfoUrl).queryParam("key", koficKey).queryParam("movieCd", dailyMap.get("movieCd"));
                     ResponseEntity<ResponseMoviceInfoData> movieinfo = restTemplate.getForEntity(builder.build().toUri(), ResponseMoviceInfoData.class);
                     Movie movie = new Movie().buildMovieFromMovieInfo(movieinfo.getBody().getMovieInfoResult().getMovieInfo(), dailyMap.get("movieNm"), Integer.parseInt(dailyMap.get("movieCd")));
                     movieMapper.insertMovie(movie);
                 }
+
             }
         }
 
