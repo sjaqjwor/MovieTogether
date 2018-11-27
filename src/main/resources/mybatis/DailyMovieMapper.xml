@@ -5,4 +5,9 @@
         insert into movietogether.dailymovie(movieCn,movierank,accaudience,dailyaudience,today)
         values (#{movieCn},#{movierank},#{accaudience},#{dailyaudience},#{today})
     </insert>
+    <select id="selectTodayMovieRank" resultType="com.movie.movie.domains.DailyMovie">
+        select *
+        from movietogether.dailymovie
+        where today=#{today}
+    </select>
 </mapper>

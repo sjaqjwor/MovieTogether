@@ -11,4 +11,5 @@ import java.util.List;
 @Repository
 public interface DailyMapper {
     void insertDailyMovie(DailyMovie dailyMovie);
+    List<DailyMovie> selectTodayMovieRank(String date);
 }
