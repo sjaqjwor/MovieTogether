@@ -8,7 +8,9 @@ import com.movie.movie.utils.koflic.ResponseDailyMoviceChartData;
 import com.movie.movie.utils.koflic.ResponseMoviceInfoData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.*;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,7 +50,7 @@ public class MovieSchedule {
     private String naverUrl;
 
 
-    @Scheduled(cron = " 0 17 15 * * *")
+    @Scheduled(cron = " 0 48 16 * * *")
     @Transactional
     public void insertMovieInformation() {
 
@@ -56,11 +58,11 @@ public class MovieSchedule {
         HttpHeaders headers = new HttpHeaders();
         headers.set("Accept", MediaType.APPLICATION_JSON_VALUE);
 
-        LocalDateTime now = LocalDateTime.now().minusDays(1);
+        LocalDateTime beforeAday = LocalDateTime.now().minusDays(1);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
 
         UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(koficDailyUrl).queryParam("key", koficKey)
-                .queryParam("targetDt", now.format(formatter));
+                .queryParam("targetDt", beforeAday.format(formatter));
 
 
         ResponseEntity<ResponseDailyMoviceChartData> responseKoflicDataResponseEntity =
@@ -73,8 +75,12 @@ public class MovieSchedule {
             headers.add("X-Naver-Client-Id", naverClientid);
             headers.add("X-Naver-Client-Secret", naverClientSecret);
 
+            LocalDateTime now = LocalDateTime.now();
+            String today = now.format(formatter);
+
+
             for (Map<String, String> dailyMap : getDailyBoxOfficeList) {
-                DailyMovie dailyMovie = new DailyMovie().buildDailyMovieFromKoflicObject(dailyMap);
+                DailyMovie dailyMovie = new DailyMovie().buildDailyMovieFromKoflicObject(dailyMap,today);
                 dailyMapper.insertDailyMovie(dailyMovie);
 
                 if (movieMapper.selectByMovieCd(Integer.parseInt(dailyMap.get("movieCd"))) == null) {
