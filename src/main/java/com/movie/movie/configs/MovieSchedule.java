@@ -6,11 +6,10 @@ import com.movie.movie.mappers.DailyMapper;
 import com.movie.movie.mappers.MovieMapper;
 import com.movie.movie.utils.koflic.ResponseDailyMoviceChartData;
 import com.movie.movie.utils.koflic.ResponseMoviceInfoData;
+import com.movie.movie.utils.naver.NaverSearchData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -50,7 +49,7 @@ public class MovieSchedule {
     private String naverUrl;
 
 
-    @Scheduled(cron = " 0 48 16 * * *")
+    @Scheduled(cron = " 0 8 17 * * *")
     @Transactional
     public void insertMovieInformation() {
 
@@ -87,6 +86,9 @@ public class MovieSchedule {
                     builder = UriComponentsBuilder.fromHttpUrl(koficMovieinfoUrl).queryParam("key", koficKey).queryParam("movieCd", dailyMap.get("movieCd"));
                     ResponseEntity<ResponseMoviceInfoData> movieinfo = restTemplate.getForEntity(builder.build().toUri(), ResponseMoviceInfoData.class);
                     Movie movie = new Movie().buildMovieFromMovieInfo(movieinfo.getBody().getMovieInfoResult().getMovieInfo(), dailyMap.get("movieNm"), Integer.parseInt(dailyMap.get("movieCd")));
+                    ResponseEntity<NaverSearchData> naverApiData = restTemplate.exchange(naverUrl+"query="+movie.getMname(), HttpMethod.GET, new HttpEntity(headers), NaverSearchData.class);
+                    NaverSearchData naverSearchData = naverApiData.getBody();
+                    movie.setMimageUrl(naverSearchData.getItems().get(0).get("image"));
                     movieMapper.insertMovie(movie);
                 }
 
