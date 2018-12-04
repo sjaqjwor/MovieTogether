@@ -5,9 +5,9 @@
         insert into movietogether.dailymovie(movieCn,movierank,accaudience,dailyaudience,today)
         values (#{movieCn},#{movierank},#{accaudience},#{dailyaudience},#{today})
     </insert>
-    <select id="selectTodayMovieRank" resultType="com.movie.movie.domains.DailyMovie">
+    <select id="selectTodayMovieRank" resultType="com.movie.movie.domains.dto.TodayMovieDto">
         select *
-        from movietogether.dailymovie
+        from movietogether.dailymovie dm join movietogether.movie m on dm.movieCn = m.movieCn
         where today=#{today}
     </select>
 </mapper>

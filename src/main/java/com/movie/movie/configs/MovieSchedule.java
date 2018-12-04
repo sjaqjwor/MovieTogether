@@ -49,7 +49,7 @@ public class MovieSchedule {
     private String naverUrl;
 
 
-    @Scheduled(cron = " 0 8 17 * * *")
+    @Scheduled(cron = " 0 16 15 * * *")
     @Transactional
     public void insertMovieInformation() {
 
